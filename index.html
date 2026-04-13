@@ -83,31 +83,57 @@
         };
 
         const BeforeAfterSlider = ({ beforeSrc, afterSrc, beforeAlt, afterAlt }) => {
-            const [sliderVal, setSliderVal] = useState(50);
+            const [sliderVal, setSliderVal] = useState(0);
+
+            useEffect(() => {
+                let animationFrame;
+                let startTime = performance.now();
+                
+                const animate = (time) => {
+                    // Loop cycle: 5000ms active sweeping, 1500ms pause at the end -> total 6500ms
+                    const elapsed = (time - startTime) % 6500;
+                    
+                    if (elapsed < 5000) {
+                        // Linear sweep from 0 to 105% (pushing slightly past the edge to clear the image fully)
+                        setSliderVal((elapsed / 5000) * 105);
+                    } else {
+                        // Pause at the end showing fully clean image
+                        setSliderVal(105);
+                    }
+                    
+                    animationFrame = requestAnimationFrame(animate);
+                };
+                
+                animationFrame = requestAnimationFrame(animate);
+                return () => cancelAnimationFrame(animationFrame);
+            }, []);
             
             return (
-                <div className="relative w-full aspect-[4/3] sm:aspect-video md:aspect-[4/3] rounded-3xl overflow-hidden shadow-[0_30px_60px_rgba(0,0,0,0.5)] border border-white/10 group bg-black/50">
-                    <img src={afterSrc} alt={afterAlt} loading="lazy" className="absolute inset-0 w-full h-full object-cover object-left" />
+                <div className="relative w-full aspect-[4/3] sm:aspect-video md:aspect-[4/3] rounded-3xl overflow-hidden shadow-[0_30px_60px_rgba(0,0,0,0.5)] border border-white/10 bg-black/50">
+                    
+                    {/* Bottom Layer: DIRTY image (Before) */}
+                    <img src={beforeSrc} alt={beforeAlt} loading="lazy" className="absolute inset-0 w-full h-full object-cover object-top" />
+                    
+                    {/* Top Layer: CLEAN image (After) */}
+                    {/* clipPath reveals the clean image from top (0%) down to sliderVal%, wiping away the dirt */}
                     <div 
                         className="absolute inset-0 w-full h-full z-10"
-                        style={{ clipPath: `polygon(0 0, ${sliderVal}% 0, ${sliderVal}% 100%, 0 100%)` }}
+                        style={{ clipPath: `polygon(0 0, 100% 0, 100% ${sliderVal}%, 0 ${sliderVal}%)` }}
                     >
-                        <img src={beforeSrc} alt={beforeAlt} loading="lazy" className="absolute inset-0 w-full h-full object-cover object-left" />
+                        <img src={afterSrc} alt={afterAlt} loading="lazy" className="absolute inset-0 w-full h-full object-cover object-top" />
                     </div>
-                    <input 
-                        type="range" 
-                        min="0" max="100" value={sliderVal} 
-                        onChange={(e) => setSliderVal(e.target.value)}
-                        aria-label="Vergelijk voor en na de schoonmaak"
-                        className="absolute inset-0 w-full h-full opacity-0 cursor-ew-resize z-30"
-                    />
+                    
+                    {/* Horizontal Water Blast / Mist Element (Image) */}
                     <div 
-                        className="absolute top-0 bottom-0 w-[2px] bg-[#00BFFF] z-20 pointer-events-none shadow-[0_0_15px_rgba(0,0,0,0.8)]"
-                        style={{ left: `${sliderVal}%`, transform: 'translateX(-50%)' }}
+                        className="absolute left-0 right-0 z-20 pointer-events-none flex justify-center items-center w-full"
+                        style={{ top: `${sliderVal}%`, transform: 'translateY(-50%)' }}
                     >
-                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-12 h-12 bg-black/60 backdrop-blur-md border border-[#00BFFF] rounded-full flex items-center justify-center shadow-xl text-[#00BFFF] group-hover:scale-110 transition-transform duration-300">
-                            <i className="fas fa-arrows-alt-h text-xl"></i>
-                        </div>
+                        <img 
+                            /* Updated to a highly complex, animated procedural SVG that perfectly mimics churning high-pressure water droplets and mist */
+                            src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1000' height='250' viewBox='0 0 1000 250' preserveAspectRatio='none'%3E%3Cdefs%3E%3Cfilter id='water-blast'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.15 0.02' numOctaves='3' result='noise' seed='0'%3E%3Canimate attributeName='seed' values='0;1;2;3;4;5;6;7;8;9;10;11;12;13;14;15;16;17;18;19' dur='0.6s' repeatCount='indefinite' /%3E%3C/feTurbulence%3E%3CfeColorMatrix type='matrix' values='1 0 0 0 1 0 1 0 0 1 0 0 1 0 1 0 0 0 25 -10' in='noise' result='droplets' /%3E%3CfeComposite operator='in' in='droplets' in2='SourceGraphic' result='maskedDroplets' /%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.03' numOctaves='2' result='mistNoise' seed='100'%3E%3Canimate attributeName='seed' values='100;101;102;103;104;105;106;107;108;109' dur='0.8s' repeatCount='indefinite' /%3E%3C/feTurbulence%3E%3CfeColorMatrix type='matrix' values='1 0 0 0 1 0 1 0 0 1 0 0 1 0 1 0 0 0 4 -1' in='mistNoise' result='mistAlpha' /%3E%3CfeComposite operator='in' in='mistAlpha' in2='SourceGraphic' result='maskedMist' /%3E%3CfeGaussianBlur in='maskedMist' stdDeviation='6' result='mistBloom' /%3E%3CfeGaussianBlur in='SourceGraphic' stdDeviation='1.5' result='coreBlur' /%3E%3CfeColorMatrix type='matrix' values='1 0 0 0 1 0 1 0 0 1 0 0 1 0 1 0 0 0 2 0' in='coreBlur' result='brightCore' /%3E%3CfeMerge%3E%3CfeMergeNode in='mistBloom' /%3E%3CfeMergeNode in='maskedDroplets' /%3E%3CfeMergeNode in='brightCore' /%3E%3C/feMerge%3E%3C/filter%3E%3ClinearGradient id='sprayShape' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0%25' stop-color='white' stop-opacity='0' /%3E%3Cstop offset='30%25' stop-color='white' stop-opacity='0.4' /%3E%3Cstop offset='48%25' stop-color='white' stop-opacity='1' /%3E%3Cstop offset='52%25' stop-color='white' stop-opacity='1' /%3E%3Cstop offset='70%25' stop-color='white' stop-opacity='0.4' /%3E%3Cstop offset='100%25' stop-color='white' stop-opacity='0' /%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='100%25' height='100%25' fill='url(%23sprayShape)' filter='url(%23water-blast)' /%3E%3C/svg%3E"
+                            alt="High pressure turbulent water spray" 
+                            className="w-[120%] max-w-none h-[50px] md:h-[80px] object-cover opacity-95 drop-shadow-[0_20px_20px_rgba(0,0,0,0.5)]"
+                        />
                     </div>
                 </div>
             );
