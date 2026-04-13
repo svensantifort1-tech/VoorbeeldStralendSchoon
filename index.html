@@ -21,6 +21,9 @@
     <!-- Babel for JSX compilation in browser -->
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
+    <!-- Three.js for 3D Simulation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
     <style>
         body { font-family: 'Inter', sans-serif; background-color: #050505; color: white; margin: 0; padding: 0; overflow-x: hidden; }
         h1, h2, h3, h4, h5, h6 { font-family: 'Poppins', sans-serif; }
@@ -28,8 +31,8 @@
         /* Custom Scrollbar */
         ::-webkit-scrollbar { width: 8px; }
         ::-webkit-scrollbar-track { background: #050505; }
-        ::-webkit-scrollbar-thumb { background: #2DD4BF; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #0D9488; }
+        ::-webkit-scrollbar-thumb { background: #00BFFF; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #008CFF; }
         .custom-scrollbar::-webkit-scrollbar { width: 6px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: rgba(255,255,255,0.05); }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 3px; }
@@ -99,10 +102,10 @@
                         className="absolute inset-0 w-full h-full opacity-0 cursor-ew-resize z-30"
                     />
                     <div 
-                        className="absolute top-0 bottom-0 w-[2px] bg-[#2DD4BF] z-20 pointer-events-none shadow-[0_0_15px_rgba(0,0,0,0.8)]"
+                        className="absolute top-0 bottom-0 w-[2px] bg-[#00BFFF] z-20 pointer-events-none shadow-[0_0_15px_rgba(0,0,0,0.8)]"
                         style={{ left: `${sliderVal}%`, transform: 'translateX(-50%)' }}
                     >
-                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-12 h-12 bg-black/60 backdrop-blur-md border border-[#2DD4BF] rounded-full flex items-center justify-center shadow-xl text-[#2DD4BF] group-hover:scale-110 transition-transform duration-300">
+                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-12 h-12 bg-black/60 backdrop-blur-md border border-[#00BFFF] rounded-full flex items-center justify-center shadow-xl text-[#00BFFF] group-hover:scale-110 transition-transform duration-300">
                             <i className="fas fa-arrows-alt-h text-xl"></i>
                         </div>
                     </div>
@@ -144,6 +147,125 @@
                 </div>
             );
         };
+
+        // --- 2D Animated Liquid SVG Logo Component ---
+        const AnimatedLogo = () => (
+            <svg 
+                viewBox="0 0 1000 400" 
+                xmlns="http://www.w3.org/2000/svg"
+                className="w-full max-w-[90%] md:max-w-3xl lg:max-w-5xl h-auto drop-shadow-[0_20px_40px_rgba(0,0,0,0.4)]"
+            >
+                <defs>
+                    <style dangerouslySetInnerHTML={{ __html: `
+                        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@900&display=swap');
+                        .logo-text { font-family: "Poppins", sans-serif; font-weight: 900; }
+                    `}} />
+
+                    <linearGradient id="stralendGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                        <stop offset="0%" stopColor="#ffffff"/>
+                        <stop offset="60%" stopColor="#e0f4ff"/>
+                        <stop offset="100%" stopColor="#a8e0ff"/>
+                    </linearGradient>
+
+                    <linearGradient id="schoonGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                        <stop offset="0%" stopColor="#66d9ff"/>
+                        <stop offset="40%" stopColor="#00BFFF"/>
+                        <stop offset="100%" stopColor="#004488"/>
+                    </linearGradient>
+
+                    <filter id="ultra-wet" x="-20%" y="-20%" width="140%" height="200%">
+                        <feTurbulence type="fractalNoise" baseFrequency="0.02" numOctaves="1" result="noise"/>
+                        <feDisplacementMap in="SourceGraphic" in2="noise" scale="1.5" xChannelSelector="R" yChannelSelector="G" result="fluidGraphic"/>
+                        <feDisplacementMap in="SourceAlpha" in2="noise" scale="1.5" xChannelSelector="R" yChannelSelector="G" result="fluidAlpha"/>
+
+                        <feDropShadow in="fluidAlpha" dx="0" dy="18" stdDeviation="10" floodColor="#000000" floodOpacity="0.8" result="shadow"/>
+
+                        <feGaussianBlur in="fluidAlpha" stdDeviation="6" result="softBlurMap"/>
+                        <feGaussianBlur in="fluidAlpha" stdDeviation="2" result="sharpBlurMap"/>
+
+                        <feSpecularLighting in="sharpBlurMap" surfaceScale="8" specularConstant="2.8" specularExponent="70" lightingColor="#ffffff" result="specLight1">
+                            <fePointLight x="400" y="-150" z="200"/>
+                        </feSpecularLighting>
+                        
+                        <feSpecularLighting in="softBlurMap" surfaceScale="5" specularConstant="1.5" specularExponent="25" lightingColor="#d4f0ff" result="specLight2">
+                            <fePointLight x="900" y="400" z="150"/>
+                        </feSpecularLighting>
+
+                        <feSpecularLighting in="softBlurMap" surfaceScale="3" specularConstant="0.8" specularExponent="40" lightingColor="#00BFFF" result="specLight3">
+                            <fePointLight x="500" y="150" z="50"/>
+                        </feSpecularLighting>
+
+                        <feComposite in="specLight1" in2="fluidAlpha" operator="in" result="maskedSpec1"/>
+                        <feComposite in="specLight2" in2="fluidAlpha" operator="in" result="maskedSpec2"/>
+                        <feComposite in="specLight3" in2="fluidAlpha" operator="in" result="maskedSpec3"/>
+
+                        <feMerge>
+                            <feMergeNode in="shadow"/>
+                            <feMergeNode in="fluidGraphic"/>
+                            <feMergeNode in="maskedSpec3"/>
+                            <feMergeNode in="maskedSpec2"/>
+                            <feMergeNode in="maskedSpec1"/>
+                        </feMerge>
+                    </filter>
+                </defs>
+
+                <g filter="url(#ultra-wet)">
+                    <text x="500" y="200" textAnchor="middle" className="logo-text" fontSize="115" letterSpacing="-3">
+                        <tspan fill="url(#stralendGrad)">Stralend</tspan><tspan fill="url(#schoonGrad)">Schoon</tspan>
+                    </text>
+
+                    <ellipse cx="115" cy="180" rx="2" ry="2" fill="url(#stralendGrad)">
+                        <animate attributeName="cy" values="180; 230; 233; 450; 450" keyTimes="0; 0.4; 0.6; 0.8; 1" calcMode="spline" keySplines="0.4 0 0.6 1; 0.2 0 0.8 1; 0.6 0 1 1; 0 0 1 1" dur="3.5s" repeatCount="indefinite" begin="0.1s"/>
+                        <animate attributeName="ry" values="2; 3; 6; 16; 2" keyTimes="0; 0.4; 0.6; 0.8; 1" calcMode="spline" keySplines="0.4 0 0.6 1; 0.2 0 0.8 1; 0.6 0 1 1; 0 0 1 1" dur="3.5s" repeatCount="indefinite" begin="0.1s"/>
+                        <animate attributeName="rx" values="2; 3; 5; 1.5; 2" keyTimes="0; 0.4; 0.6; 0.8; 1" calcMode="spline" keySplines="0.4 0 0.6 1; 0.2 0 0.8 1; 0.6 0 1 1; 0 0 1 1" dur="3.5s" repeatCount="indefinite" begin="0.1s"/>
+                        <animate attributeName="opacity" values="0; 1; 1; 0; 0" keyTimes="0; 0.1; 0.75; 0.8; 1" dur="3.5s" repeatCount="indefinite" begin="0.1s"/>
+                    </ellipse>
+
+                    <ellipse cx="288" cy="180" rx="2.5" ry="2.5" fill="url(#stralendGrad)">
+                        <animate attributeName="cy" values="180; 230; 233; 450; 450" keyTimes="0; 0.4; 0.6; 0.8; 1" calcMode="spline" keySplines="0.4 0 0.6 1; 0.2 0 0.8 1; 0.6 0 1 1; 0 0 1 1" dur="4.2s" repeatCount="indefinite" begin="1.5s"/>
+                        <animate attributeName="ry" values="2.5; 3.5; 7; 18; 2.5" keyTimes="0; 0.4; 0.6; 0.8; 1" calcMode="spline" keySplines="0.4 0 0.6 1; 0.2 0 0.8 1; 0.6 0 1 1; 0 0 1 1" dur="4.2s" repeatCount="indefinite" begin="1.5s"/>
+                        <animate attributeName="rx" values="2.5; 3.5; 5.5; 1.5; 2.5" keyTimes="0; 0.4; 0.6; 0.8; 1" calcMode="spline" keySplines="0.4 0 0.6 1; 0.2 0 0.8 1; 0.6 0 1 1; 0 0 1 1" dur="4.2s" repeatCount="indefinite" begin="1.5s"/>
+                        <animate attributeName="opacity" values="0; 1; 1; 0; 0" keyTimes="0; 0.1; 0.75; 0.8; 1" dur="4.2s" repeatCount="indefinite" begin="1.5s"/>
+                    </ellipse>
+
+                    <ellipse cx="470" cy="170" rx="1.5" ry="1.5" fill="url(#stralendGrad)">
+                        <animate attributeName="cy" values="170; 215; 218; 450; 450" keyTimes="0; 0.4; 0.6; 0.8; 1" calcMode="spline" keySplines="0.4 0 0.6 1; 0.2 0 0.8 1; 0.6 0 1 1; 0 0 1 1" dur="2.8s" repeatCount="indefinite" begin="0.8s"/>
+                        <animate attributeName="ry" values="1.5; 2; 5; 12; 1.5" keyTimes="0; 0.4; 0.6; 0.8; 1" calcMode="spline" keySplines="0.4 0 0.6 1; 0.2 0 0.8 1; 0.6 0 1 1; 0 0 1 1" dur="2.8s" repeatCount="indefinite" begin="0.8s"/>
+                        <animate attributeName="rx" values="1.5; 2; 4; 1; 1.5" keyTimes="0; 0.4; 0.6; 0.8; 1" calcMode="spline" keySplines="0.4 0 0.6 1; 0.2 0 0.8 1; 0.6 0 1 1; 0 0 1 1" dur="2.8s" repeatCount="indefinite" begin="0.8s"/>
+                        <animate attributeName="opacity" values="0; 1; 1; 0; 0" keyTimes="0; 0.1; 0.75; 0.8; 1" dur="2.8s" repeatCount="indefinite" begin="0.8s"/>
+                    </ellipse>
+
+                    <ellipse cx="565" cy="180" rx="3" ry="3" fill="url(#schoonGrad)">
+                        <animate attributeName="cy" values="180; 240; 245; 450; 450" keyTimes="0; 0.4; 0.6; 0.8; 1" calcMode="spline" keySplines="0.4 0 0.6 1; 0.2 0 0.8 1; 0.6 0 1 1; 0 0 1 1" dur="5s" repeatCount="indefinite" begin="2.2s"/>
+                        <animate attributeName="ry" values="3; 4; 8; 22; 3" keyTimes="0; 0.4; 0.6; 0.8; 1" calcMode="spline" keySplines="0.4 0 0.6 1; 0.2 0 0.8 1; 0.6 0 1 1; 0 0 1 1" dur="5s" repeatCount="indefinite" begin="2.2s"/>
+                        <animate attributeName="rx" values="3; 4; 6.5; 2; 3" keyTimes="0; 0.4; 0.6; 0.8; 1" calcMode="spline" keySplines="0.4 0 0.6 1; 0.2 0 0.8 1; 0.6 0 1 1; 0 0 1 1" dur="5s" repeatCount="indefinite" begin="2.2s"/>
+                        <animate attributeName="opacity" values="0; 1; 1; 0; 0" keyTimes="0; 0.1; 0.75; 0.8; 1" dur="5s" repeatCount="indefinite" begin="2.2s"/>
+                    </ellipse>
+
+                    <ellipse cx="700" cy="170" rx="2" ry="2" fill="url(#schoonGrad)">
+                        <animate attributeName="cy" values="170; 215; 218; 450; 450" keyTimes="0; 0.4; 0.6; 0.8; 1" calcMode="spline" keySplines="0.4 0 0.6 1; 0.2 0 0.8 1; 0.6 0 1 1; 0 0 1 1" dur="3.9s" repeatCount="indefinite" begin="0.4s"/>
+                        <animate attributeName="ry" values="2; 3; 5.5; 14; 2" keyTimes="0; 0.4; 0.6; 0.8; 1" calcMode="spline" keySplines="0.4 0 0.6 1; 0.2 0 0.8 1; 0.6 0 1 1; 0 0 1 1" dur="3.9s" repeatCount="indefinite" begin="0.4s"/>
+                        <animate attributeName="rx" values="2; 3; 4.5; 1.5; 2" keyTimes="0; 0.4; 0.6; 0.8; 1" calcMode="spline" keySplines="0.4 0 0.6 1; 0.2 0 0.8 1; 0.6 0 1 1; 0 0 1 1" dur="3.9s" repeatCount="indefinite" begin="0.4s"/>
+                        <animate attributeName="opacity" values="0; 1; 1; 0; 0" keyTimes="0; 0.1; 0.75; 0.8; 1" dur="3.9s" repeatCount="indefinite" begin="0.4s"/>
+                    </ellipse>
+
+                    <ellipse cx="800" cy="180" rx="2.5" ry="2.5" fill="url(#schoonGrad)">
+                        <animate attributeName="cy" values="180; 225; 228; 450; 450" keyTimes="0; 0.4; 0.6; 0.8; 1" calcMode="spline" keySplines="0.4 0 0.6 1; 0.2 0 0.8 1; 0.6 0 1 1; 0 0 1 1" dur="4.6s" repeatCount="indefinite" begin="2.7s"/>
+                        <animate attributeName="ry" values="2.5; 3.5; 6.5; 16; 2.5" keyTimes="0; 0.4; 0.6; 0.8; 1" calcMode="spline" keySplines="0.4 0 0.6 1; 0.2 0 0.8 1; 0.6 0 1 1; 0 0 1 1" dur="4.6s" repeatCount="indefinite" begin="2.7s"/>
+                        <animate attributeName="rx" values="2.5; 3.5; 5; 1.5; 2.5" keyTimes="0; 0.4; 0.6; 0.8; 1" calcMode="spline" keySplines="0.4 0 0.6 1; 0.2 0 0.8 1; 0.6 0 1 1; 0 0 1 1" dur="4.6s" repeatCount="indefinite" begin="2.7s"/>
+                        <animate attributeName="opacity" values="0; 1; 1; 0; 0" keyTimes="0; 0.1; 0.75; 0.8; 1" dur="4.6s" repeatCount="indefinite" begin="2.7s"/>
+                    </ellipse>
+                    
+                    <ellipse cx="890" cy="170" rx="2" ry="2" fill="url(#schoonGrad)">
+                        <animate attributeName="cy" values="170; 215; 218; 450; 450" keyTimes="0; 0.4; 0.6; 0.8; 1" calcMode="spline" keySplines="0.4 0 0.6 1; 0.2 0 0.8 1; 0.6 0 1 1; 0 0 1 1" dur="3.2s" repeatCount="indefinite" begin="1.1s"/>
+                        <animate attributeName="ry" values="2; 3; 6; 14; 2" keyTimes="0; 0.4; 0.6; 0.8; 1" calcMode="spline" keySplines="0.4 0 0.6 1; 0.2 0 0.8 1; 0.6 0 1 1; 0 0 1 1" dur="3.2s" repeatCount="indefinite" begin="1.1s"/>
+                        <animate attributeName="rx" values="2; 3; 4.5; 1.5; 2" keyTimes="0; 0.4; 0.6; 0.8; 1" calcMode="spline" keySplines="0.4 0 0.6 1; 0.2 0 0.8 1; 0.6 0 1 1; 0 0 1 1" dur="3.2s" repeatCount="indefinite" begin="1.1s"/>
+                        <animate attributeName="opacity" values="0; 1; 1; 0; 0" keyTimes="0; 0.1; 0.75; 0.8; 1" dur="3.2s" repeatCount="indefinite" begin="1.1s"/>
+                    </ellipse>
+
+                </g>
+            </svg>
+        );
 
         // --- Main App Component ---
 
@@ -201,7 +323,7 @@
             };
 
             return (
-                <div className="relative min-h-screen text-white font-['Inter'] selection:bg-[#2DD4BF] selection:text-[#1A1A1A] overflow-x-hidden">
+                <div className="relative min-h-screen text-white font-['Inter'] selection:bg-[#00BFFF] selection:text-[#1A1A1A] overflow-x-hidden">
                     
                     {/* Global Luxury Wallpaper Background */}
                     <div className="fixed inset-0 z-[-1] bg-[#050505]">
@@ -223,7 +345,7 @@
                                     aria-label="Ga naar Home"
                                     className="font-['Poppins'] text-2xl md:text-3xl font-black text-white tracking-tight hover:opacity-80 transition-opacity"
                                 >
-                                    Stralend<span className="text-[#2DD4BF]">Schoon</span>
+                                    Stralend<span className="text-[#00BFFF]">Schoon</span>
                                 </button>
 
                                 {/* Desktop Nav */}
@@ -232,15 +354,15 @@
                                         <button 
                                             key={item}
                                             onClick={() => scrollToSection(item.toLowerCase())}
-                                            className={`font-['Poppins'] font-semibold text-sm lg:text-base transition-colors relative group py-2 ${activeSection === item.toLowerCase() ? 'text-[#2DD4BF]' : 'text-white/80 hover:text-white'}`}
+                                            className={`font-['Poppins'] font-semibold text-sm lg:text-base transition-colors relative group py-2 ${activeSection === item.toLowerCase() ? 'text-[#00BFFF]' : 'text-white/80 hover:text-white'}`}
                                         >
                                             {item}
-                                            <span className={`absolute bottom-0 left-0 h-0.5 bg-[#2DD4BF] transition-all duration-300 ${activeSection === item.toLowerCase() ? 'w-full' : 'w-0 group-hover:w-full'}`}></span>
+                                            <span className={`absolute bottom-0 left-0 h-0.5 bg-[#00BFFF] transition-all duration-300 ${activeSection === item.toLowerCase() ? 'w-full' : 'w-0 group-hover:w-full'}`}></span>
                                         </button>
                                     ))}
                                     <button 
                                         onClick={() => scrollToSection('offertes')}
-                                        className="bg-gradient-to-r from-[#2DD4BF] to-[#0D9488] text-white px-6 lg:px-8 py-3 rounded-full font-['Poppins'] font-bold text-sm shadow-[0_0_20px_rgba(45,212,191,0.3)] hover:shadow-[0_0_30px_rgba(45,212,191,0.5)] hover:-translate-y-0.5 transition-all"
+                                        className="bg-gradient-to-r from-[#00BFFF] to-[#008CFF] text-white px-6 lg:px-8 py-3 rounded-full font-['Poppins'] font-bold text-sm shadow-[0_0_20px_rgba(0,191,255,0.3)] hover:shadow-[0_0_30px_rgba(0,191,255,0.5)] hover:-translate-y-0.5 transition-all"
                                     >
                                         Offerte aanvragen
                                     </button>
@@ -248,7 +370,7 @@
 
                                 {/* Mobile Menu Toggle */}
                                 <button 
-                                    className="md:hidden text-white p-2 focus:outline-none focus:ring-2 focus:ring-[#2DD4BF] rounded-lg"
+                                    className="md:hidden text-white p-2 focus:outline-none focus:ring-2 focus:ring-[#00BFFF] rounded-lg"
                                     onClick={() => setIsMenuOpen(!isMenuOpen)}
                                     aria-label={isMenuOpen ? "Sluit menu" : "Open menu"}
                                     aria-expanded={isMenuOpen}
@@ -268,7 +390,7 @@
                                     <button 
                                         key={item}
                                         onClick={() => scrollToSection(item.toLowerCase())}
-                                        className={`font-['Poppins'] font-bold text-xl p-4 rounded-2xl text-left ${activeSection === item.toLowerCase() ? 'bg-white/10 text-[#2DD4BF]' : 'text-white hover:bg-white/5'}`}
+                                        className={`font-['Poppins'] font-bold text-xl p-4 rounded-2xl text-left ${activeSection === item.toLowerCase() ? 'bg-white/10 text-[#00BFFF]' : 'text-white hover:bg-white/5'}`}
                                     >
                                         {item}
                                     </button>
@@ -276,7 +398,7 @@
                                 <div className="pt-4 mt-2 border-t border-white/10">
                                     <button 
                                         onClick={() => scrollToSection('offertes')}
-                                        className="bg-gradient-to-r from-[#2DD4BF] to-[#0D9488] text-white w-full py-4 rounded-2xl font-['Poppins'] font-bold text-lg shadow-lg text-center"
+                                        className="bg-gradient-to-r from-[#00BFFF] to-[#008CFF] text-white w-full py-4 rounded-2xl font-['Poppins'] font-bold text-lg shadow-lg text-center"
                                     >
                                         Offerte aanvragen
                                     </button>
@@ -290,18 +412,22 @@
                         
                         {/* --- Hero Section --- */}
                         <section id="home" className="relative min-h-screen flex items-center justify-center text-center px-4 pt-20">
-                            <div className="relative z-10 max-w-5xl mx-auto">
+                            <div className="relative z-10 w-full max-w-5xl mx-auto">
                                 <FadeIn>
-                                    <h1 className="font-['Poppins'] text-5xl md:text-6xl lg:text-8xl font-black text-white mb-6 tracking-tight drop-shadow-2xl">
-                                        Stralend<span className="text-[#2DD4BF]">Schoon</span>
-                                    </h1>
-                                    <p className="font-['Inter'] text-xl md:text-3xl text-white/80 font-light mb-12 max-w-3xl mx-auto leading-relaxed">
+                                    
+                                    {/* --- Animated SVG Hero Area --- */}
+                                    <div className="flex justify-center w-full">
+                                        <h1 className="sr-only">StralendSchoon</h1>
+                                        <AnimatedLogo />
+                                    </div>
+
+                                    <p className="font-['Inter'] text-xl md:text-3xl text-white/80 font-light mb-12 max-w-3xl mx-auto leading-relaxed mt-[-40px] sm:mt-[-80px] md:mt-[-120px] lg:mt-[-150px]">
                                         Uw specialist in premium oprit-, terras- en gevelreiniging. Ervaar pure luxe in reiniging.
                                     </p>
                                     <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">
                                         <button 
                                             onClick={() => scrollToSection('diensten')}
-                                            className="bg-gradient-to-r from-[#2DD4BF] to-[#0D9488] text-white px-8 py-4 rounded-full font-['Poppins'] font-semibold text-lg shadow-[0_0_20px_rgba(45,212,191,0.3)] hover:shadow-[0_0_30px_rgba(45,212,191,0.5)] hover:-translate-y-1 transition-all duration-300 w-full sm:w-auto flex items-center justify-center gap-2"
+                                            className="bg-gradient-to-r from-[#00BFFF] to-[#008CFF] text-white px-8 py-4 rounded-full font-['Poppins'] font-semibold text-lg shadow-[0_0_20px_rgba(0,191,255,0.3)] hover:shadow-[0_0_30px_rgba(0,191,255,0.5)] hover:-translate-y-1 transition-all duration-300 w-full sm:w-auto flex items-center justify-center gap-2"
                                         >
                                             Ontdek onze diensten <i className="fas fa-arrow-right text-xl"></i>
                                         </button>
@@ -319,7 +445,7 @@
                         {/* --- Values Section --- */}
                         <section className="py-32 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto relative border-t border-white/5">
                             <FadeIn className="text-center max-w-3xl mx-auto mb-20">
-                                <h2 className="font-['Poppins'] text-4xl md:text-5xl font-extrabold text-white mb-6 tracking-tight">De <span className="text-[#2DD4BF]">Standaard</span> in Schoon</h2>
+                                <h2 className="font-['Poppins'] text-4xl md:text-5xl font-extrabold text-white mb-6 tracking-tight">De <span className="text-[#00BFFF]">Standaard</span> in Schoon</h2>
                                 <p className="font-['Inter'] text-white/70 text-xl leading-relaxed">
                                     Schoon is meer dan alleen netjes. Het is een frisse start, een prestigieuze uitstraling en een gezonde leefomgeving.
                                 </p>
@@ -332,8 +458,8 @@
                                     { icon: "fas fa-exchange-alt", title: "Flexibiliteit", desc: "Ieder pand is uniek. Daarom bieden we altijd exclusief maatwerk." },
                                     { icon: "fas fa-leaf", title: "Duurzaam", desc: "Milieuvriendelijke producten en methodes voor een heldere toekomst." }
                                 ].map((val, idx) => (
-                                    <FadeIn key={idx} delay={idx * 100} className="bg-white/5 backdrop-blur-lg rounded-[2rem] p-8 shadow-2xl hover:shadow-[0_20px_50px_rgba(45,212,191,0.1)] transition-all duration-500 hover:-translate-y-2 border border-white/10 group">
-                                        <div className="w-16 h-16 bg-white/10 group-hover:bg-[#2DD4BF] border border-white/20 group-hover:border-[#2DD4BF] rounded-2xl flex items-center justify-center text-[#2DD4BF] group-hover:text-black transition-all duration-500 mb-8 rotate-3 group-hover:rotate-0 shadow-lg">
+                                    <FadeIn key={idx} delay={idx * 100} className="bg-white/5 backdrop-blur-lg rounded-[2rem] p-8 shadow-2xl hover:shadow-[0_20px_50px_rgba(0,191,255,0.1)] transition-all duration-500 hover:-translate-y-2 border border-white/10 group">
+                                        <div className="w-16 h-16 bg-white/10 group-hover:bg-[#00BFFF] border border-white/20 group-hover:border-[#00BFFF] rounded-2xl flex items-center justify-center text-[#00BFFF] group-hover:text-black transition-all duration-500 mb-8 rotate-3 group-hover:rotate-0 shadow-lg">
                                             <i className={`${val.icon} text-3xl`}></i>
                                         </div>
                                         <h3 className="font-['Poppins'] text-2xl font-bold text-white mb-4">{val.title}</h3>
@@ -347,7 +473,7 @@
                         <section id="resultaten" className="py-32 px-4 sm:px-6 lg:px-8 border-t border-white/5">
                             <div className="max-w-7xl mx-auto">
                                 <FadeIn className="text-center max-w-3xl mx-auto mb-20">
-                                    <h2 className="font-['Poppins'] text-4xl md:text-5xl font-extrabold text-white mb-6 tracking-tight">Verbluffende <span className="text-[#2DD4BF]">Resultaten</span></h2>
+                                    <h2 className="font-['Poppins'] text-4xl md:text-5xl font-extrabold text-white mb-6 tracking-tight">Verbluffende <span className="text-[#00BFFF]">Resultaten</span></h2>
                                     <p className="font-['Inter'] text-white/70 text-xl leading-relaxed">
                                         Aanschouw de transformatie. Schuif de balk heen en weer om de impact van onze dieptereiniging te ervaren.
                                     </p>
@@ -356,12 +482,12 @@
                                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
                                     <FadeIn>
                                         <BeforeAfterSlider 
-                                            beforeSrc="voorterras.jpg" 
-                                            afterSrc="naterras.jpg" 
+                                            beforeSrc="Gemini_Generated_Image_5omy635omy635omy.jpg" 
+                                            afterSrc="Gemini_Generated_Image_ab3gf2ab3gf2ab3g.jpg" 
                                             beforeAlt="Terras voor reiniging met vuil en mos" 
                                             afterAlt="Terras na reiniging, schoon en stralend"
                                         />
-                                        <p className="text-center mt-6 font-['Poppins'] font-semibold text-[#2DD4BF] text-lg uppercase tracking-widest">Terras Reiniging</p>
+                                        <p className="text-center mt-6 font-['Poppins'] font-semibold text-[#00BFFF] text-lg uppercase tracking-widest">Terras Reiniging</p>
                                     </FadeIn>
                                     <FadeIn delay={200}>
                                         <BeforeAfterSlider 
@@ -370,7 +496,7 @@
                                             beforeAlt="Serre voor reiniging met groene aanslag" 
                                             afterAlt="Serre na reiniging, helder glas"
                                         />
-                                        <p className="text-center mt-6 font-['Poppins'] font-semibold text-[#2DD4BF] text-lg uppercase tracking-widest">Glas & Serre Reiniging</p>
+                                        <p className="text-center mt-6 font-['Poppins'] font-semibold text-[#00BFFF] text-lg uppercase tracking-widest">Glas & Serre Reiniging</p>
                                     </FadeIn>
                                 </div>
                             </div>
@@ -379,7 +505,7 @@
                         {/* --- Timeline Section --- */}
                         <section id="werkwijze" className="py-32 px-4 sm:px-6 lg:px-8 max-w-5xl mx-auto border-t border-white/5">
                             <FadeIn className="text-center mb-20">
-                                <h2 className="font-['Poppins'] text-4xl md:text-5xl font-extrabold text-white mb-6 tracking-tight">Exclusieve <span className="text-[#2DD4BF]">Werkwijze</span></h2>
+                                <h2 className="font-['Poppins'] text-4xl md:text-5xl font-extrabold text-white mb-6 tracking-tight">Exclusieve <span className="text-[#00BFFF]">Werkwijze</span></h2>
                                 <p className="font-['Inter'] text-white/70 text-xl leading-relaxed">
                                     Een discrete en uiterst gestructureerde aanpak. Volledige transparantie vanaf het eerste moment.
                                 </p>
@@ -396,17 +522,17 @@
                                 ].map((step, idx) => (
                                     <FadeIn key={idx} delay={idx * 150} className={`relative flex items-center justify-between md:justify-normal w-full mb-16 last:mb-0 ${idx % 2 === 0 ? 'md:flex-row-reverse' : ''}`}>
                                         
-                                        <div className="hidden md:flex absolute left-1/2 -translate-x-1/2 w-14 h-14 rounded-full bg-black border border-[#2DD4BF] items-center justify-center z-10 font-['Poppins'] font-bold text-xl text-[#2DD4BF] shadow-[0_0_15px_rgba(45,212,191,0.3)]">
+                                        <div className="hidden md:flex absolute left-1/2 -translate-x-1/2 w-14 h-14 rounded-full bg-black border border-[#00BFFF] items-center justify-center z-10 font-['Poppins'] font-bold text-xl text-[#00BFFF] shadow-[0_0_15px_rgba(0,191,255,0.3)]">
                                             {idx + 1}
                                         </div>
                                         
-                                        <div className="md:hidden absolute -left-[29px] w-14 h-14 rounded-full bg-black border border-[#2DD4BF] flex items-center justify-center z-10 font-['Poppins'] font-bold text-xl text-[#2DD4BF] shadow-sm">
+                                        <div className="md:hidden absolute -left-[29px] w-14 h-14 rounded-full bg-black border border-[#00BFFF] flex items-center justify-center z-10 font-['Poppins'] font-bold text-xl text-[#00BFFF] shadow-sm">
                                             {idx + 1}
                                         </div>
 
                                         <div className="w-full md:w-[45%] pl-12 md:pl-0">
-                                            <div className="bg-white/5 backdrop-blur-md p-8 rounded-[2rem] border border-white/10 hover:border-[#2DD4BF]/50 transition-all duration-300 hover:shadow-[0_10px_30px_rgba(0,0,0,0.5)] group">
-                                                <h3 className="font-['Poppins'] text-2xl font-bold text-white mb-3 group-hover:text-[#2DD4BF] transition-colors">{step.title}</h3>
+                                            <div className="bg-white/5 backdrop-blur-md p-8 rounded-[2rem] border border-white/10 hover:border-[#00BFFF]/50 transition-all duration-300 hover:shadow-[0_10px_30px_rgba(0,0,0,0.5)] group">
+                                                <h3 className="font-['Poppins'] text-2xl font-bold text-white mb-3 group-hover:text-[#00BFFF] transition-colors">{step.title}</h3>
                                                 <p className="font-['Inter'] text-white/60 text-lg">{step.desc}</p>
                                             </div>
                                         </div>
@@ -418,7 +544,7 @@
                         {/* --- Diensten Section --- */}
                         <section id="diensten" className="py-32 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto min-h-screen border-t border-white/5">
                             <FadeIn className="text-center max-w-3xl mx-auto mb-20">
-                                <h2 className="font-['Poppins'] text-4xl md:text-6xl font-black text-white mb-6 tracking-tight">Onze <span className="text-[#2DD4BF]">Diensten</span></h2>
+                                <h2 className="font-['Poppins'] text-4xl md:text-6xl font-black text-white mb-6 tracking-tight">Onze <span className="text-[#00BFFF]">Diensten</span></h2>
                                 <p className="font-['Inter'] text-white/70 text-xl leading-relaxed">
                                     Kies voor ultiem vakmanschap. Van nauwkeurig onderhoud tot een spectaculaire dieptereiniging, wij laten uw pand in oude glorie herstellen.
                                 </p>
@@ -431,14 +557,14 @@
                                     { img: "Gemini_Generated_Image_kxpwo3kxpwo3kxpw.jpg", icon: "fas fa-building", title: "Gevel Reiniging", desc: "Een schone gevel beschermt de waarde van uw pand. Wij zorgen dat uw woning er weer luxueus en representatief uitziet." },
                                     { img: "Gemini_Generated_Image_yedamiyedamiyeda.jpg", icon: "fas fa-home", title: "Glas & Serre", desc: "Een schone overkapping of serre zorgt voor subliem helder uitzicht. Wij laten het glas glanzen met veilige, hoogwaardige technieken." }
                                 ].map((service, idx) => (
-                                    <FadeIn key={idx} delay={idx * 100} className="bg-white/5 backdrop-blur-xl rounded-[2.5rem] overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.5)] hover:shadow-[0_30px_60px_rgba(45,212,191,0.1)] transition-all duration-500 group flex flex-col border border-white/10">
+                                    <FadeIn key={idx} delay={idx * 100} className="bg-white/5 backdrop-blur-xl rounded-[2.5rem] overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.5)] hover:shadow-[0_30px_60px_rgba(0,191,255,0.1)] transition-all duration-500 group flex flex-col border border-white/10">
                                         <div className="relative h-72 overflow-hidden bg-black/50">
                                             <img src={service.img} alt={service.title} loading="lazy" className="w-full h-full object-cover opacity-80 group-hover:opacity-100 group-hover:scale-110 transition-all duration-700 ease-out" />
                                             <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent opacity-90"></div>
                                             <h3 className="absolute bottom-6 left-8 font-['Poppins'] text-3xl font-bold text-white z-10">{service.title}</h3>
                                         </div>
                                         <div className="p-8 relative flex-grow flex flex-col">
-                                            <div className="absolute -top-14 right-8 w-20 h-20 bg-black/80 backdrop-blur-md border border-white/10 rounded-2xl flex items-center justify-center shadow-2xl text-[#2DD4BF] group-hover:border-[#2DD4BF] transition-colors duration-500 rotate-3 group-hover:rotate-0">
+                                            <div className="absolute -top-14 right-8 w-20 h-20 bg-black/80 backdrop-blur-md border border-white/10 rounded-2xl flex items-center justify-center shadow-2xl text-[#00BFFF] group-hover:border-[#00BFFF] transition-colors duration-500 rotate-3 group-hover:rotate-0">
                                                 <i className={`${service.icon} text-4xl`}></i>
                                             </div>
                                             <p className="font-['Inter'] text-white/70 text-lg mb-8 flex-grow leading-relaxed pr-8 mt-2">{service.desc}</p>
@@ -448,7 +574,7 @@
                                                 </span>
                                                 <button 
                                                     onClick={() => scrollToSection('offertes')}
-                                                    className="text-[#2DD4BF] font-semibold hover:text-white transition-colors flex items-center gap-2"
+                                                    className="text-[#00BFFF] font-semibold hover:text-white transition-colors flex items-center gap-2"
                                                     aria-label={`Vraag offerte aan voor ${service.title}`}
                                                 >
                                                     Offerte <i className="fas fa-arrow-right text-lg"></i>
@@ -463,7 +589,7 @@
                         {/* --- Offertes Section --- */}
                         <section id="offertes" className="py-32 px-4 sm:px-6 lg:px-8 max-w-5xl mx-auto min-h-screen border-t border-white/5">
                             <FadeIn className="text-center mb-16 max-w-3xl mx-auto">
-                                <h2 className="font-['Poppins'] text-4xl md:text-6xl font-black text-white mb-6 tracking-tight">Vrijblijvende <span className="text-[#2DD4BF]">Offerte</span></h2>
+                                <h2 className="font-['Poppins'] text-4xl md:text-6xl font-black text-white mb-6 tracking-tight">Vrijblijvende <span className="text-[#00BFFF]">Offerte</span></h2>
                                 <p className="font-['Inter'] text-white/70 text-xl leading-relaxed">
                                     Vraag binnen enkele minuten een luxueuze offerte op maat aan. Duidelijke prijzen, absolute perfectie.
                                 </p>
@@ -471,9 +597,9 @@
 
                             <FadeIn>
                                 {submitted ? (
-                                    <div className="bg-white/5 backdrop-blur-xl border border-[#2DD4BF]/50 rounded-[2.5rem] p-16 text-center shadow-2xl">
-                                        <div className="w-24 h-24 bg-black/50 border border-[#2DD4BF] rounded-full flex items-center justify-center mx-auto mb-8 shadow-lg">
-                                            <i className="fas fa-check-circle text-5xl text-[#2DD4BF]"></i>
+                                    <div className="bg-white/5 backdrop-blur-xl border border-[#00BFFF]/50 rounded-[2.5rem] p-16 text-center shadow-2xl">
+                                        <div className="w-24 h-24 bg-black/50 border border-[#00BFFF] rounded-full flex items-center justify-center mx-auto mb-8 shadow-lg">
+                                            <i className="fas fa-check-circle text-5xl text-[#00BFFF]"></i>
                                         </div>
                                         <h3 className="font-['Poppins'] text-3xl font-bold text-white mb-4">Aanvraag in Behandeling!</h3>
                                         <p className="text-white/70 text-lg max-w-lg mx-auto">Hartelijk dank voor uw interesse in StralendSchoon. Onze specialisten nemen zo spoedig mogelijk contact met u op. <br/><br/><span className="text-sm opacity-50">(Dit is een demonstratie applicatie, er is geen echte data verstuurd).</span></p>
@@ -482,34 +608,34 @@
                                     <form onSubmit={handleSubmit} className="bg-white/5 backdrop-blur-2xl rounded-[2.5rem] shadow-[0_30px_60px_rgba(0,0,0,0.6)] border border-white/10 p-8 md:p-14">
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
                                             <div>
-                                                <label htmlFor="naam" className="block font-['Poppins'] text-sm font-semibold text-white/80 mb-2">Volledige Naam <span className="text-[#2DD4BF]">*</span></label>
-                                                <input id="naam" type="text" required aria-required="true" className="w-full px-5 py-4 rounded-2xl border border-white/10 bg-black/40 text-white placeholder-gray-500 focus:bg-black/60 focus:border-[#2DD4BF] focus:ring-1 focus:ring-[#2DD4BF] focus:outline-none transition-all font-['Inter'] text-lg" />
+                                                <label htmlFor="naam" className="block font-['Poppins'] text-sm font-semibold text-white/80 mb-2">Volledige Naam <span className="text-[#00BFFF]">*</span></label>
+                                                <input id="naam" type="text" required aria-required="true" className="w-full px-5 py-4 rounded-2xl border border-white/10 bg-black/40 text-white placeholder-gray-500 focus:bg-black/60 focus:border-[#00BFFF] focus:ring-1 focus:ring-[#00BFFF] focus:outline-none transition-all font-['Inter'] text-lg" />
                                             </div>
                                             <div>
-                                                <label htmlFor="email" className="block font-['Poppins'] text-sm font-semibold text-white/80 mb-2">E-mailadres <span className="text-[#2DD4BF]">*</span></label>
-                                                <input id="email" type="email" required aria-required="true" className="w-full px-5 py-4 rounded-2xl border border-white/10 bg-black/40 text-white placeholder-gray-500 focus:bg-black/60 focus:border-[#2DD4BF] focus:ring-1 focus:ring-[#2DD4BF] focus:outline-none transition-all font-['Inter'] text-lg" />
+                                                <label htmlFor="email" className="block font-['Poppins'] text-sm font-semibold text-white/80 mb-2">E-mailadres <span className="text-[#00BFFF]">*</span></label>
+                                                <input id="email" type="email" required aria-required="true" className="w-full px-5 py-4 rounded-2xl border border-white/10 bg-black/40 text-white placeholder-gray-500 focus:bg-black/60 focus:border-[#00BFFF] focus:ring-1 focus:ring-[#00BFFF] focus:outline-none transition-all font-['Inter'] text-lg" />
                                             </div>
                                             <div>
-                                                <label htmlFor="telefoon" className="block font-['Poppins'] text-sm font-semibold text-white/80 mb-2">Telefoonnummer <span className="text-[#2DD4BF]">*</span></label>
-                                                <input id="telefoon" type="tel" required aria-required="true" className="w-full px-5 py-4 rounded-2xl border border-white/10 bg-black/40 text-white placeholder-gray-500 focus:bg-black/60 focus:border-[#2DD4BF] focus:ring-1 focus:ring-[#2DD4BF] focus:outline-none transition-all font-['Inter'] text-lg" />
+                                                <label htmlFor="telefoon" className="block font-['Poppins'] text-sm font-semibold text-white/80 mb-2">Telefoonnummer <span className="text-[#00BFFF]">*</span></label>
+                                                <input id="telefoon" type="tel" required aria-required="true" className="w-full px-5 py-4 rounded-2xl border border-white/10 bg-black/40 text-white placeholder-gray-500 focus:bg-black/60 focus:border-[#00BFFF] focus:ring-1 focus:ring-[#00BFFF] focus:outline-none transition-all font-['Inter'] text-lg" />
                                             </div>
                                             <div>
                                                 <label htmlFor="oppervlakte" className="block font-['Poppins'] text-sm font-semibold text-white/80 mb-2">Geschatte oppervlakte (m²)</label>
-                                                <input id="oppervlakte" type="number" min="0" className="w-full px-5 py-4 rounded-2xl border border-white/10 bg-black/40 text-white placeholder-gray-500 focus:bg-black/60 focus:border-[#2DD4BF] focus:ring-1 focus:ring-[#2DD4BF] focus:outline-none transition-all font-['Inter'] text-lg" />
+                                                <input id="oppervlakte" type="number" min="0" className="w-full px-5 py-4 rounded-2xl border border-white/10 bg-black/40 text-white placeholder-gray-500 focus:bg-black/60 focus:border-[#00BFFF] focus:ring-1 focus:ring-[#00BFFF] focus:outline-none transition-all font-['Inter'] text-lg" />
                                             </div>
                                         </div>
 
                                         <div className="mb-8">
-                                            <label htmlFor="adres" className="block font-['Poppins'] text-sm font-semibold text-white/80 mb-2">Adres & Woonplaats <span className="text-[#2DD4BF]">*</span></label>
-                                            <input id="adres" type="text" required aria-required="true" className="w-full px-5 py-4 rounded-2xl border border-white/10 bg-black/40 text-white placeholder-gray-500 focus:bg-black/60 focus:border-[#2DD4BF] focus:ring-1 focus:ring-[#2DD4BF] focus:outline-none transition-all font-['Inter'] text-lg" />
+                                            <label htmlFor="adres" className="block font-['Poppins'] text-sm font-semibold text-white/80 mb-2">Adres & Woonplaats <span className="text-[#00BFFF]">*</span></label>
+                                            <input id="adres" type="text" required aria-required="true" className="w-full px-5 py-4 rounded-2xl border border-white/10 bg-black/40 text-white placeholder-gray-500 focus:bg-black/60 focus:border-[#00BFFF] focus:ring-1 focus:ring-[#00BFFF] focus:outline-none transition-all font-['Inter'] text-lg" />
                                         </div>
 
                                         <fieldset className="mb-8">
                                             <legend className="block font-['Poppins'] text-sm font-semibold text-white/80 mb-4">Selecteer gewenste exclusieve diensten:</legend>
                                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                                 {['Oprit reiniging', 'Terras reiniging', 'Gevel reiniging', 'Glas & Serre reiniging'].map((dienst, i) => (
-                                                    <label key={i} className="flex items-center gap-4 p-5 border border-white/10 rounded-2xl bg-black/20 cursor-pointer hover:border-[#2DD4BF]/50 hover:bg-black/40 transition-colors group">
-                                                        <input type="checkbox" name="diensten" value={dienst} className="w-6 h-6 bg-black/50 rounded-md border-white/20 text-[#2DD4BF] focus:ring-[#2DD4BF] focus:ring-offset-black cursor-pointer" />
+                                                    <label key={i} className="flex items-center gap-4 p-5 border border-white/10 rounded-2xl bg-black/20 cursor-pointer hover:border-[#00BFFF]/50 hover:bg-black/40 transition-colors group">
+                                                        <input type="checkbox" name="diensten" value={dienst} className="w-6 h-6 bg-black/50 rounded-md border-white/20 text-[#00BFFF] focus:ring-[#00BFFF] focus:ring-offset-black cursor-pointer" />
                                                         <span className="font-['Inter'] text-white/80 font-medium text-lg group-hover:text-white">{dienst}</span>
                                                     </label>
                                                 ))}
@@ -518,16 +644,16 @@
 
                                         <div className="mb-8">
                                             <label htmlFor="foto" className="block font-['Poppins'] text-sm font-semibold text-white/80 mb-2">Upload foto van de situatie (Optioneel)</label>
-                                            <input id="foto" type="file" accept="image/*" className="w-full px-5 py-4 rounded-2xl border border-white/10 bg-black/40 text-white/60 focus:bg-black/60 focus:border-[#2DD4BF] transition-colors font-['Inter'] file:mr-6 file:py-3 file:px-6 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-white/10 file:text-white hover:file:bg-[#2DD4BF] hover:file:text-black file:cursor-pointer file:transition-colors" />
+                                            <input id="foto" type="file" accept="image/*" className="w-full px-5 py-4 rounded-2xl border border-white/10 bg-black/40 text-white/60 focus:bg-black/60 focus:border-[#00BFFF] transition-colors font-['Inter'] file:mr-6 file:py-3 file:px-6 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-white/10 file:text-white hover:file:bg-[#00BFFF] hover:file:text-black file:cursor-pointer file:transition-colors" />
                                         </div>
 
                                         <div className="mb-10">
                                             <label htmlFor="opmerkingen" className="block font-['Poppins'] text-sm font-semibold text-white/80 mb-2">Bijzonderheden of vragen</label>
-                                            <textarea id="opmerkingen" rows="4" className="w-full px-5 py-4 rounded-2xl border border-white/10 bg-black/40 text-white placeholder-gray-500 focus:bg-black/60 focus:border-[#2DD4BF] focus:ring-1 focus:ring-[#2DD4BF] focus:outline-none transition-all font-['Inter'] text-lg resize-none"></textarea>
+                                            <textarea id="opmerkingen" rows="4" className="w-full px-5 py-4 rounded-2xl border border-white/10 bg-black/40 text-white placeholder-gray-500 focus:bg-black/60 focus:border-[#00BFFF] focus:ring-1 focus:ring-[#00BFFF] focus:outline-none transition-all font-['Inter'] text-lg resize-none"></textarea>
                                         </div>
 
                                         <div className="text-center sm:text-right">
-                                            <button type="submit" className="w-full sm:w-auto bg-gradient-to-r from-[#2DD4BF] to-[#0D9488] text-white px-12 py-5 rounded-full font-['Poppins'] font-bold text-lg shadow-[0_0_20px_rgba(45,212,191,0.3)] hover:shadow-[0_0_30px_rgba(45,212,191,0.5)] hover:-translate-y-1 transition-all duration-300">
+                                            <button type="submit" className="w-full sm:w-auto bg-gradient-to-r from-[#00BFFF] to-[#008CFF] text-white px-12 py-5 rounded-full font-['Poppins'] font-bold text-lg shadow-[0_0_20px_rgba(0,191,255,0.3)] hover:shadow-[0_0_30px_rgba(0,191,255,0.5)] hover:-translate-y-1 transition-all duration-300">
                                                 Verstuur Aanvraag
                                             </button>
                                         </div>
@@ -584,16 +710,16 @@
                                         className="font-['Poppins'] text-3xl font-black text-white tracking-tight mb-6"
                                         aria-label="Terug naar Home"
                                     >
-                                        Stralend<span className="text-[#2DD4BF]">Schoon</span>
+                                        Stralend<span className="text-[#00BFFF]">Schoon</span>
                                     </button>
                                     <p className="font-light text-lg mb-8 max-w-md text-white/60 leading-relaxed">
                                         De absolute standaard in luxe buitenreiniging. Geef uw pand de prestige die het verdient.
                                     </p>
                                     <div className="flex gap-4">
-                                        <a href="#" aria-label="Instagram pagina" className="w-12 h-12 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-[#2DD4BF] hover:bg-[#2DD4BF] hover:border-[#2DD4BF] hover:text-black hover:-translate-y-1 transition-all duration-300">
+                                        <a href="#" aria-label="Instagram pagina" className="w-12 h-12 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-[#00BFFF] hover:bg-[#00BFFF] hover:border-[#00BFFF] hover:text-black hover:-translate-y-1 transition-all duration-300">
                                             <i className="fab fa-instagram text-xl"></i>
                                         </a>
-                                        <a href="#" aria-label="Facebook pagina" className="w-12 h-12 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-[#2DD4BF] hover:bg-[#2DD4BF] hover:border-[#2DD4BF] hover:text-black hover:-translate-y-1 transition-all duration-300">
+                                        <a href="#" aria-label="Facebook pagina" className="w-12 h-12 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-[#00BFFF] hover:bg-[#00BFFF] hover:border-[#00BFFF] hover:text-black hover:-translate-y-1 transition-all duration-300">
                                             <i className="fab fa-facebook-f text-xl"></i>
                                         </a>
                                     </div>
@@ -602,8 +728,8 @@
                                 <div className="md:col-span-3">
                                     <h3 className="font-['Poppins'] text-xl text-white font-bold mb-6">Contact</h3>
                                     <ul className="space-y-4 text-white/70">
-                                        <li><a href="tel:0612345678" className="hover:text-[#2DD4BF] transition-colors flex items-center gap-3"><i className="fas fa-phone text-lg"></i> 06-12345678</a></li>
-                                        <li><a href="mailto:info@stralendschoon.nl" className="hover:text-[#2DD4BF] transition-colors flex items-center gap-3"><i className="fas fa-envelope text-lg"></i> info@stralendschoon.nl</a></li>
+                                        <li><a href="tel:0612345678" className="hover:text-[#00BFFF] transition-colors flex items-center gap-3"><i className="fas fa-phone text-lg"></i> 06-12345678</a></li>
+                                        <li><a href="mailto:info@stralendschoon.nl" className="hover:text-[#00BFFF] transition-colors flex items-center gap-3"><i className="fas fa-envelope text-lg"></i> info@stralendschoon.nl</a></li>
                                         <li className="flex items-center gap-3"><i className="fas fa-map-marker-alt text-lg"></i> Zuid-Holland & Zeeland</li>
                                     </ul>
                                 </div>
@@ -612,17 +738,17 @@
                                     <h3 className="font-['Poppins'] text-xl text-white font-bold mb-6">Informatie</h3>
                                     <ul className="space-y-4 text-white/70">
                                         <li>
-                                            <button onClick={() => setActiveModal('voorwaarden')} className="hover:text-[#2DD4BF] transition-colors text-left">
+                                            <button onClick={() => setActiveModal('voorwaarden')} className="hover:text-[#00BFFF] transition-colors text-left">
                                                 Algemene voorwaarden
                                             </button>
                                         </li>
                                         <li>
-                                            <button onClick={() => setActiveModal('privacy')} className="hover:text-[#2DD4BF] transition-colors text-left">
+                                            <button onClick={() => setActiveModal('privacy')} className="hover:text-[#00BFFF] transition-colors text-left">
                                                 Privacyverklaring
                                             </button>
                                         </li>
                                         <li>
-                                            <button onClick={() => setActiveModal('impressum')} className="hover:text-[#2DD4BF] transition-colors text-left">
+                                            <button onClick={() => setActiveModal('impressum')} className="hover:text-[#00BFFF] transition-colors text-left">
                                                 Impressum
                                             </button>
                                         </li>
@@ -634,7 +760,7 @@
                                 <p>&copy; {new Date().getFullYear()} StralendSchoon. Absolute Perfectie.</p>
                                 <div className="flex items-center gap-2">
                                     <span>Crafted by</span>
-                                    <a href="https://www.fyxo.online/" target="_blank" rel="noreferrer" aria-label="Website gemaakt door FYXO" className="font-['Poppins'] font-black text-xl text-white tracking-widest hover:text-[#2DD4BF] transition-colors">
+                                    <a href="https://www.fyxo.online/" target="_blank" rel="noreferrer" aria-label="Website gemaakt door FYXO" className="font-['Poppins'] font-black text-xl text-white tracking-widest hover:text-[#00BFFF] transition-colors">
                                         FYXO
                                     </a>
                                 </div>
@@ -649,7 +775,7 @@
                             className="fixed bottom-6 left-6 right-6 md:left-8 md:right-auto md:max-w-md bg-black/80 backdrop-blur-2xl text-white p-6 rounded-[2rem] shadow-[0_20px_50px_rgba(0,0,0,0.5)] border border-white/10 z-[90] flex flex-col sm:flex-row items-center gap-6 animate-slideUp"
                         >
                             <p className="text-sm font-['Inter'] leading-relaxed flex-grow text-center sm:text-left text-white/70">
-                                Wij gebruiken cookies voor een optimale ervaring. Bekijk onze <button onClick={() => setActiveModal('privacy')} className="text-[#2DD4BF] underline font-medium hover:text-white transition-colors">privacyverklaring</button>.
+                                Wij gebruiken cookies voor een optimale ervaring. Bekijk onze <button onClick={() => setActiveModal('privacy')} className="text-[#00BFFF] underline font-medium hover:text-white transition-colors">privacyverklaring</button>.
                             </p>
                             <div className="flex gap-3 w-full sm:w-auto shrink-0">
                                 <button 
@@ -660,7 +786,7 @@
                                 </button>
                                 <button 
                                     onClick={acceptCookie}
-                                    className="flex-1 sm:flex-none px-6 py-3 rounded-xl bg-gradient-to-r from-[#2DD4BF] to-[#0D9488] text-white text-sm font-bold hover:shadow-[0_0_15px_rgba(45,212,191,0.4)] transition-all"
+                                    className="flex-1 sm:flex-none px-6 py-3 rounded-xl bg-gradient-to-r from-[#00BFFF] to-[#008CFF] text-white text-sm font-bold hover:shadow-[0_0_15px_rgba(0,191,255,0.4)] transition-all"
                                 >
                                     Accepteren
                                 </button>
