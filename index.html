@@ -189,12 +189,12 @@
             );
         };
 
-        // --- 2D Animated Liquid SVG Logo Component ---
-        const AnimatedLogo = () => (
+        // --- 2D Animated Liquid SVG Logo Component (Desktop) ---
+        const DesktopAnimatedLogo = () => (
             <svg 
                 viewBox="0 0 1000 400" 
                 xmlns="http://www.w3.org/2000/svg"
-                className="w-[130%] -ml-[15%] sm:ml-0 sm:w-full sm:max-w-[90%] md:max-w-3xl lg:max-w-5xl h-auto drop-shadow-[0_20px_40px_rgba(0,0,0,0.4)] hw-accelerate"
+                className="hidden sm:block w-full sm:max-w-[90%] md:max-w-3xl lg:max-w-5xl h-auto drop-shadow-[0_20px_40px_rgba(0,0,0,0.4)] hw-accelerate mx-auto"
             >
                 <defs>
                     <style dangerouslySetInnerHTML={{ __html: `
@@ -250,7 +250,6 @@
                     </filter>
                 </defs>
 
-                {/* Added mobile-no-filter to completely prevent lag on mobile devices caused by heavy SVG math */}
                 <g filter="url(#ultra-wet)" className="mobile-no-filter">
                     <text x="500" y="200" textAnchor="middle" className="logo-text" fontSize="115" letterSpacing="-3">
                         <tspan fill="url(#stralendGrad)">Stralend</tspan><tspan fill="url(#schoonGrad)">Schoon</tspan>
@@ -300,6 +299,130 @@
                     
                     <ellipse cx="890" cy="170" rx="2" ry="2" fill="url(#schoonGrad)">
                         <animate attributeName="cy" values="170; 215; 218; 450; 450" keyTimes="0; 0.4; 0.6; 0.8; 1" calcMode="spline" keySplines="0.4 0 0.6 1; 0.2 0 0.8 1; 0.6 0 1 1; 0 0 1 1" dur="3.2s" repeatCount="indefinite" begin="1.1s"/>
+                        <animate attributeName="ry" values="2; 3; 6; 14; 2" keyTimes="0; 0.4; 0.6; 0.8; 1" calcMode="spline" keySplines="0.4 0 0.6 1; 0.2 0 0.8 1; 0.6 0 1 1; 0 0 1 1" dur="3.2s" repeatCount="indefinite" begin="1.1s"/>
+                        <animate attributeName="rx" values="2; 3; 4.5; 1.5; 2" keyTimes="0; 0.4; 0.6; 0.8; 1" calcMode="spline" keySplines="0.4 0 0.6 1; 0.2 0 0.8 1; 0.6 0 1 1; 0 0 1 1" dur="3.2s" repeatCount="indefinite" begin="1.1s"/>
+                        <animate attributeName="opacity" values="0; 1; 1; 0; 0" keyTimes="0; 0.1; 0.75; 0.8; 1" dur="3.2s" repeatCount="indefinite" begin="1.1s"/>
+                    </ellipse>
+
+                </g>
+            </svg>
+        );
+
+        // --- 2D Animated Liquid SVG Logo Component (Mobile Stacked) ---
+        const MobileAnimatedLogo = () => (
+            <svg 
+                viewBox="0 0 1000 500" 
+                xmlns="http://www.w3.org/2000/svg"
+                className="block sm:hidden w-full max-w-[95%] h-auto drop-shadow-[0_20px_40px_rgba(0,0,0,0.4)] hw-accelerate mx-auto"
+            >
+                <defs>
+                    <style dangerouslySetInnerHTML={{ __html: `
+                        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@900&display=swap');
+                        .logo-text { font-family: "Poppins", sans-serif; font-weight: 900; }
+                    `}} />
+
+                    <linearGradient id="stralendGradMobile" x1="0%" y1="0%" x2="0%" y2="100%">
+                        <stop offset="0%" stopColor="#ffffff"/>
+                        <stop offset="60%" stopColor="#e0f4ff"/>
+                        <stop offset="100%" stopColor="#a8e0ff"/>
+                    </linearGradient>
+
+                    <linearGradient id="schoonGradMobile" x1="0%" y1="0%" x2="0%" y2="100%">
+                        <stop offset="0%" stopColor="#66d9ff"/>
+                        <stop offset="40%" stopColor="#00BFFF"/>
+                        <stop offset="100%" stopColor="#004488"/>
+                    </linearGradient>
+
+                    <filter id="ultra-wet-mobile" x="-20%" y="-20%" width="140%" height="200%">
+                        <feTurbulence type="fractalNoise" baseFrequency="0.02" numOctaves="1" result="noise"/>
+                        <feDisplacementMap in="SourceGraphic" in2="noise" scale="1.5" xChannelSelector="R" yChannelSelector="G" result="fluidGraphic"/>
+                        <feDisplacementMap in="SourceAlpha" in2="noise" scale="1.5" xChannelSelector="R" yChannelSelector="G" result="fluidAlpha"/>
+
+                        <feDropShadow in="fluidAlpha" dx="0" dy="18" stdDeviation="10" floodColor="#000000" floodOpacity="0.8" result="shadow"/>
+
+                        <feGaussianBlur in="fluidAlpha" stdDeviation="6" result="softBlurMap"/>
+                        <feGaussianBlur in="fluidAlpha" stdDeviation="2" result="sharpBlurMap"/>
+
+                        <feSpecularLighting in="sharpBlurMap" surfaceScale="8" specularConstant="2.8" specularExponent="70" lightingColor="#ffffff" result="specLight1">
+                            <fePointLight x="400" y="-150" z="200"/>
+                        </feSpecularLighting>
+                        
+                        <feSpecularLighting in="softBlurMap" surfaceScale="5" specularConstant="1.5" specularExponent="25" lightingColor="#d4f0ff" result="specLight2">
+                            <fePointLight x="900" y="400" z="150"/>
+                        </feSpecularLighting>
+
+                        <feSpecularLighting in="softBlurMap" surfaceScale="3" specularConstant="0.8" specularExponent="40" lightingColor="#00BFFF" result="specLight3">
+                            <fePointLight x="500" y="150" z="50"/>
+                        </feSpecularLighting>
+
+                        <feComposite in="specLight1" in2="fluidAlpha" operator="in" result="maskedSpec1"/>
+                        <feComposite in="specLight2" in2="fluidAlpha" operator="in" result="maskedSpec2"/>
+                        <feComposite in="specLight3" in2="fluidAlpha" operator="in" result="maskedSpec3"/>
+
+                        <feMerge>
+                            <feMergeNode in="shadow"/>
+                            <feMergeNode in="fluidGraphic"/>
+                            <feMergeNode in="maskedSpec3"/>
+                            <feMergeNode in="maskedSpec2"/>
+                            <feMergeNode in="maskedSpec1"/>
+                        </feMerge>
+                    </filter>
+                </defs>
+
+                <g filter="url(#ultra-wet-mobile)" className="mobile-no-filter">
+                    <text x="500" y="200" textAnchor="middle" className="logo-text" fontSize="155" letterSpacing="-3">
+                        <tspan fill="url(#stralendGradMobile)">Stralend</tspan>
+                    </text>
+                    <text x="500" y="340" textAnchor="middle" className="logo-text" fontSize="155" letterSpacing="-3">
+                        <tspan fill="url(#schoonGradMobile)">Schoon</tspan>
+                    </text>
+
+                    {/* Stralend Droplets Shifted X:+200 */}
+                    <ellipse cx="315" cy="180" rx="2" ry="2" fill="url(#stralendGradMobile)">
+                        <animate attributeName="cy" values="180; 230; 233; 500; 500" keyTimes="0; 0.4; 0.6; 0.8; 1" calcMode="spline" keySplines="0.4 0 0.6 1; 0.2 0 0.8 1; 0.6 0 1 1; 0 0 1 1" dur="3.5s" repeatCount="indefinite" begin="0.1s"/>
+                        <animate attributeName="ry" values="2; 3; 6; 16; 2" keyTimes="0; 0.4; 0.6; 0.8; 1" calcMode="spline" keySplines="0.4 0 0.6 1; 0.2 0 0.8 1; 0.6 0 1 1; 0 0 1 1" dur="3.5s" repeatCount="indefinite" begin="0.1s"/>
+                        <animate attributeName="rx" values="2; 3; 5; 1.5; 2" keyTimes="0; 0.4; 0.6; 0.8; 1" calcMode="spline" keySplines="0.4 0 0.6 1; 0.2 0 0.8 1; 0.6 0 1 1; 0 0 1 1" dur="3.5s" repeatCount="indefinite" begin="0.1s"/>
+                        <animate attributeName="opacity" values="0; 1; 1; 0; 0" keyTimes="0; 0.1; 0.75; 0.8; 1" dur="3.5s" repeatCount="indefinite" begin="0.1s"/>
+                    </ellipse>
+
+                    <ellipse cx="488" cy="180" rx="2.5" ry="2.5" fill="url(#stralendGradMobile)">
+                        <animate attributeName="cy" values="180; 230; 233; 500; 500" keyTimes="0; 0.4; 0.6; 0.8; 1" calcMode="spline" keySplines="0.4 0 0.6 1; 0.2 0 0.8 1; 0.6 0 1 1; 0 0 1 1" dur="4.2s" repeatCount="indefinite" begin="1.5s"/>
+                        <animate attributeName="ry" values="2.5; 3.5; 7; 18; 2.5" keyTimes="0; 0.4; 0.6; 0.8; 1" calcMode="spline" keySplines="0.4 0 0.6 1; 0.2 0 0.8 1; 0.6 0 1 1; 0 0 1 1" dur="4.2s" repeatCount="indefinite" begin="1.5s"/>
+                        <animate attributeName="rx" values="2.5; 3.5; 5.5; 1.5; 2.5" keyTimes="0; 0.4; 0.6; 0.8; 1" calcMode="spline" keySplines="0.4 0 0.6 1; 0.2 0 0.8 1; 0.6 0 1 1; 0 0 1 1" dur="4.2s" repeatCount="indefinite" begin="1.5s"/>
+                        <animate attributeName="opacity" values="0; 1; 1; 0; 0" keyTimes="0; 0.1; 0.75; 0.8; 1" dur="4.2s" repeatCount="indefinite" begin="1.5s"/>
+                    </ellipse>
+
+                    <ellipse cx="670" cy="170" rx="1.5" ry="1.5" fill="url(#stralendGradMobile)">
+                        <animate attributeName="cy" values="170; 215; 218; 500; 500" keyTimes="0; 0.4; 0.6; 0.8; 1" calcMode="spline" keySplines="0.4 0 0.6 1; 0.2 0 0.8 1; 0.6 0 1 1; 0 0 1 1" dur="2.8s" repeatCount="indefinite" begin="0.8s"/>
+                        <animate attributeName="ry" values="1.5; 2; 5; 12; 1.5" keyTimes="0; 0.4; 0.6; 0.8; 1" calcMode="spline" keySplines="0.4 0 0.6 1; 0.2 0 0.8 1; 0.6 0 1 1; 0 0 1 1" dur="2.8s" repeatCount="indefinite" begin="0.8s"/>
+                        <animate attributeName="rx" values="1.5; 2; 4; 1; 1.5" keyTimes="0; 0.4; 0.6; 0.8; 1" calcMode="spline" keySplines="0.4 0 0.6 1; 0.2 0 0.8 1; 0.6 0 1 1; 0 0 1 1" dur="2.8s" repeatCount="indefinite" begin="0.8s"/>
+                        <animate attributeName="opacity" values="0; 1; 1; 0; 0" keyTimes="0; 0.1; 0.75; 0.8; 1" dur="2.8s" repeatCount="indefinite" begin="0.8s"/>
+                    </ellipse>
+
+                    {/* Schoon Droplets Shifted X:-200 Y:+140 */}
+                    <ellipse cx="365" cy="320" rx="3" ry="3" fill="url(#schoonGradMobile)">
+                        <animate attributeName="cy" values="320; 380; 385; 500; 500" keyTimes="0; 0.4; 0.6; 0.8; 1" calcMode="spline" keySplines="0.4 0 0.6 1; 0.2 0 0.8 1; 0.6 0 1 1; 0 0 1 1" dur="5s" repeatCount="indefinite" begin="2.2s"/>
+                        <animate attributeName="ry" values="3; 4; 8; 22; 3" keyTimes="0; 0.4; 0.6; 0.8; 1" calcMode="spline" keySplines="0.4 0 0.6 1; 0.2 0 0.8 1; 0.6 0 1 1; 0 0 1 1" dur="5s" repeatCount="indefinite" begin="2.2s"/>
+                        <animate attributeName="rx" values="3; 4; 6.5; 2; 3" keyTimes="0; 0.4; 0.6; 0.8; 1" calcMode="spline" keySplines="0.4 0 0.6 1; 0.2 0 0.8 1; 0.6 0 1 1; 0 0 1 1" dur="5s" repeatCount="indefinite" begin="2.2s"/>
+                        <animate attributeName="opacity" values="0; 1; 1; 0; 0" keyTimes="0; 0.1; 0.75; 0.8; 1" dur="5s" repeatCount="indefinite" begin="2.2s"/>
+                    </ellipse>
+
+                    <ellipse cx="500" cy="310" rx="2" ry="2" fill="url(#schoonGradMobile)">
+                        <animate attributeName="cy" values="310; 355; 358; 500; 500" keyTimes="0; 0.4; 0.6; 0.8; 1" calcMode="spline" keySplines="0.4 0 0.6 1; 0.2 0 0.8 1; 0.6 0 1 1; 0 0 1 1" dur="3.9s" repeatCount="indefinite" begin="0.4s"/>
+                        <animate attributeName="ry" values="2; 3; 5.5; 14; 2" keyTimes="0; 0.4; 0.6; 0.8; 1" calcMode="spline" keySplines="0.4 0 0.6 1; 0.2 0 0.8 1; 0.6 0 1 1; 0 0 1 1" dur="3.9s" repeatCount="indefinite" begin="0.4s"/>
+                        <animate attributeName="rx" values="2; 3; 4.5; 1.5; 2" keyTimes="0; 0.4; 0.6; 0.8; 1" calcMode="spline" keySplines="0.4 0 0.6 1; 0.2 0 0.8 1; 0.6 0 1 1; 0 0 1 1" dur="3.9s" repeatCount="indefinite" begin="0.4s"/>
+                        <animate attributeName="opacity" values="0; 1; 1; 0; 0" keyTimes="0; 0.1; 0.75; 0.8; 1" dur="3.9s" repeatCount="indefinite" begin="0.4s"/>
+                    </ellipse>
+
+                    <ellipse cx="600" cy="320" rx="2.5" ry="2.5" fill="url(#schoonGradMobile)">
+                        <animate attributeName="cy" values="320; 365; 368; 500; 500" keyTimes="0; 0.4; 0.6; 0.8; 1" calcMode="spline" keySplines="0.4 0 0.6 1; 0.2 0 0.8 1; 0.6 0 1 1; 0 0 1 1" dur="4.6s" repeatCount="indefinite" begin="2.7s"/>
+                        <animate attributeName="ry" values="2.5; 3.5; 6.5; 16; 2.5" keyTimes="0; 0.4; 0.6; 0.8; 1" calcMode="spline" keySplines="0.4 0 0.6 1; 0.2 0 0.8 1; 0.6 0 1 1; 0 0 1 1" dur="4.6s" repeatCount="indefinite" begin="2.7s"/>
+                        <animate attributeName="rx" values="2.5; 3.5; 5; 1.5; 2.5" keyTimes="0; 0.4; 0.6; 0.8; 1" calcMode="spline" keySplines="0.4 0 0.6 1; 0.2 0 0.8 1; 0.6 0 1 1; 0 0 1 1" dur="4.6s" repeatCount="indefinite" begin="2.7s"/>
+                        <animate attributeName="opacity" values="0; 1; 1; 0; 0" keyTimes="0; 0.1; 0.75; 0.8; 1" dur="4.6s" repeatCount="indefinite" begin="2.7s"/>
+                    </ellipse>
+                    
+                    <ellipse cx="690" cy="310" rx="2" ry="2" fill="url(#schoonGradMobile)">
+                        <animate attributeName="cy" values="310; 355; 358; 500; 500" keyTimes="0; 0.4; 0.6; 0.8; 1" calcMode="spline" keySplines="0.4 0 0.6 1; 0.2 0 0.8 1; 0.6 0 1 1; 0 0 1 1" dur="3.2s" repeatCount="indefinite" begin="1.1s"/>
                         <animate attributeName="ry" values="2; 3; 6; 14; 2" keyTimes="0; 0.4; 0.6; 0.8; 1" calcMode="spline" keySplines="0.4 0 0.6 1; 0.2 0 0.8 1; 0.6 0 1 1; 0 0 1 1" dur="3.2s" repeatCount="indefinite" begin="1.1s"/>
                         <animate attributeName="rx" values="2; 3; 4.5; 1.5; 2" keyTimes="0; 0.4; 0.6; 0.8; 1" calcMode="spline" keySplines="0.4 0 0.6 1; 0.2 0 0.8 1; 0.6 0 1 1; 0 0 1 1" dur="3.2s" repeatCount="indefinite" begin="1.1s"/>
                         <animate attributeName="opacity" values="0; 1; 1; 0; 0" keyTimes="0; 0.1; 0.75; 0.8; 1" dur="3.2s" repeatCount="indefinite" begin="1.1s"/>
@@ -472,7 +595,8 @@
                                     {/* --- Animated SVG Hero Area --- */}
                                     <div className="flex justify-center w-full">
                                         <h1 className="sr-only">StralendSchoon</h1>
-                                        <AnimatedLogo />
+                                        <DesktopAnimatedLogo />
+                                        <MobileAnimatedLogo />
                                     </div>
 
                                     {/* Responsive Margin fix applied here so it doesnt crash into logo on mobile */}
