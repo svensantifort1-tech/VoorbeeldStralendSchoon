@@ -92,14 +92,20 @@
             // Using refs instead of state for performance (prevents React re-renders 60x a second)
             const clipLayerRef = useRef(null);
             const waterBlastWrapperRef = useRef(null);
+            const containerRef = useRef(null);
 
             useEffect(() => {
                 let animationFrame;
-                let startTime = performance.now();
+                let isAnimating = false;
+                
+                // Random offset so multiple sliders don't sync perfectly together
+                const timeOffset = Math.random() * 6500; 
                 
                 const animate = (time) => {
+                    if (!isAnimating) return;
+
                     // Loop cycle: 5000ms active sweeping, 1500ms pause at the end -> total 6500ms
-                    const elapsed = (time - startTime) % 6500;
+                    const elapsed = (time + timeOffset) % 6500;
                     let val = 0;
                     
                     if (elapsed < 5000) {
@@ -117,12 +123,30 @@
                     animationFrame = requestAnimationFrame(animate);
                 };
                 
-                animationFrame = requestAnimationFrame(animate);
-                return () => cancelAnimationFrame(animationFrame);
+                // Performance Fix: Only run heavy animation loop when component is visible on screen
+                const observer = new IntersectionObserver(([entry]) => {
+                    if (entry.isIntersecting) {
+                        if (!isAnimating) {
+                            isAnimating = true;
+                            animationFrame = requestAnimationFrame(animate);
+                        }
+                    } else {
+                        isAnimating = false;
+                        if (animationFrame) cancelAnimationFrame(animationFrame);
+                    }
+                }, { threshold: 0.01 });
+
+                if (containerRef.current) observer.observe(containerRef.current);
+                
+                return () => {
+                    isAnimating = false;
+                    if (animationFrame) cancelAnimationFrame(animationFrame);
+                    observer.disconnect();
+                };
             }, []);
             
             return (
-                <div className="relative w-full aspect-[4/3] sm:aspect-video md:aspect-[4/3] rounded-3xl overflow-hidden shadow-[0_30px_60px_rgba(0,0,0,0.5)] border border-white/10 bg-black/50 hw-accelerate">
+                <div ref={containerRef} className="relative w-full aspect-[4/3] sm:aspect-video md:aspect-[4/3] rounded-3xl overflow-hidden shadow-[0_30px_60px_rgba(0,0,0,0.5)] border border-white/10 bg-black/50 hw-accelerate">
                     
                     {/* Bottom Layer: DIRTY image (Before) */}
                     <img src={beforeSrc} alt={beforeAlt} loading="lazy" decoding="async" className="absolute inset-0 w-full h-full object-cover object-top" />
@@ -313,7 +337,7 @@
             <svg 
                 viewBox="0 0 1000 500" 
                 xmlns="http://www.w3.org/2000/svg"
-                className="block sm:hidden w-[120%] max-w-[120%] shrink-0 h-auto drop-shadow-[0_20px_40px_rgba(0,0,0,0.4)] hw-accelerate mx-auto"
+                className="block sm:hidden w-[150%] max-w-none -ml-[25%] shrink-0 h-auto drop-shadow-[0_20px_40px_rgba(0,0,0,0.4)] hw-accelerate mx-auto"
             >
                 <defs>
                     <style dangerouslySetInnerHTML={{ __html: `
@@ -448,33 +472,30 @@
                 }, 500);
             }, []);
 
-            // Optimized Scroll Listener with Throttling
+            // Optimized Active Section Listener with Intersection Observer (Replaces expensive scroll listener)
             useEffect(() => {
-                let isThrottled = false;
+                const sections = ['home', 'resultaten', 'werkwijze', 'diensten', 'offertes'];
                 
-                const handleScroll = () => {
-                    if (isThrottled) return;
-                    isThrottled = true;
-
-                    setTimeout(() => {
-                        const sections = ['home', 'resultaten', 'werkwijze', 'diensten', 'offertes'];
-                        const scrollPosition = window.scrollY + 200;
-
-                        for (const section of sections) {
-                            const element = document.getElementById(section);
-                            if (element && 
-                                element.offsetTop <= scrollPosition && 
-                                (element.offsetTop + element.offsetHeight) > scrollPosition) {
-                                setActiveSection(section);
-                            }
-                        }
-                        isThrottled = false;
-                    }, 100); // Only execute at most once every 100ms
+                const observerOptions = {
+                    root: null,
+                    rootMargin: '-20% 0px -60% 0px', // Trigger when section is cleanly in viewport
+                    threshold: 0
                 };
 
-                // Added passive flag to improve scroll rendering performance
-                window.addEventListener('scroll', handleScroll, { passive: true });
-                return () => window.removeEventListener('scroll', handleScroll);
+                const observer = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            setActiveSection(entry.target.id);
+                        }
+                    });
+                }, observerOptions);
+
+                sections.forEach(id => {
+                    const element = document.getElementById(id);
+                    if (element) observer.observe(element);
+                });
+
+                return () => observer.disconnect();
             }, []);
 
             const acceptCookie = () => {
